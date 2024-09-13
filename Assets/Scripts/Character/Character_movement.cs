@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class Character_movement : MonoBehaviour
@@ -15,6 +16,11 @@ public class Character_movement : MonoBehaviour
     float moveXstand;
     float moveYstand;
 
+    Vector3 direction;
+    public GameObject bulletPref;
+    public float cooldown = 3f;
+    float lastAttackPoint = -9999f;
+    public GameObject shootPoint;
 
     
     
@@ -45,6 +51,12 @@ public class Character_movement : MonoBehaviour
             Animate(moveXstand, moveYstand, 0);
 
         }
+        if (Input.GetMouseButtonDown(0))
+        {
+            Attack();
+        }
+        else
+            animator.SetBool("IsAttack", false);
 
     }
 
@@ -71,5 +83,32 @@ public class Character_movement : MonoBehaviour
         }
         animator.SetFloat("MoveX", moveX);
         animator.SetFloat("MoveY", moveY);
+    }
+
+    void Attack()
+    {
+       
+        
+            if(Time.time > lastAttackPoint + cooldown)
+        {
+            animator.SetBool("IsAttack", true);
+            animator.SetFloat("MoveX", moveXstand);
+            animator.SetFloat("MoveY", moveYstand);
+
+            direction = Input.mousePosition;
+            direction.z = 0f;
+            direction = Camera.main.ScreenToWorldPoint(direction);
+            direction = direction - transform.position;
+
+            Debug.Log(direction);
+
+            GameObject bulletInstance = Instantiate(bulletPref, transform.position, Quaternion.identity);
+            bulletInstance.GetComponent<Rigidbody2D>().velocity = direction * 5f;
+
+            Destroy(bulletInstance);
+            lastAttackPoint = Time.time;
+        }
+            
+
     }
 }
